@@ -1,0 +1,23 @@
+[project]
+name = "RECOVER"
+version = "0.1.0"
+description = "Ecosystem Condition and Recovery Modeling"
+authors = [
+    {name = "G. Singh", email = "researcher@example.com"}
+]
+dependencies = [
+    "pandas",
+    "numpy",
+    "torch",
+    "torchvision",
+    "scikit-learn",
+    "matplotlib",
+    "tqdm",
+    "wandb",
+    "earthengine-api",
+    "geopandas",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
