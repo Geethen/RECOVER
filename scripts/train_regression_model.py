@@ -5,10 +5,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import wandb
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # Seed all random number generators
 def seed_all(seed=42):
@@ -24,29 +26,112 @@ def seed_all(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# Define the regression model
-class RegressionModel(nn.Module):
-    def __init__(self, input_dim, output_dim, hidden_dims=[128, 64, 32]):
-        super(RegressionModel, self).__init__()
-        
-        layers = []
-        prev_dim = input_dim
-        
-        # Build hidden layers
-        for hidden_dim in hidden_dims:
-            layers.append(nn.Linear(prev_dim, hidden_dim))
-            layers.append(nn.ReLU())
-            layers.append(nn.BatchNorm1d(hidden_dim))
-            layers.append(nn.Dropout(0.2))
-            prev_dim = hidden_dim
-        
-        # Output layer (no activation for regression)
-        layers.append(nn.Linear(prev_dim, output_dim))
-        
-        self.network = nn.Sequential(*layers)
-    
+def init_weights(m):
+    """Weight initialization for better convergence (Kaiming for ReLU)"""
+    if isinstance(m, nn.Linear):
+        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
+    elif isinstance(m, nn.LayerNorm):
+        nn.init.constant_(m.weight, 1)
+        nn.init.constant_(m.bias, 0)
+
+class EmbeddingAttention(nn.Module):
+    """Learns which parts of the 64D embedding are most important for the tasks"""
+    def __init__(self, dim):
+        super().__init__()
+        self.attn = nn.Sequential(
+            nn.Linear(dim, dim),
+            nn.Sigmoid()
+        )
     def forward(self, x):
-        return self.network(x)
+        return x * self.attn(x)
+
+
+class GaussianNoise(nn.Module):
+    """Adds noise to embeddings to improve robustness during training"""
+    def __init__(self, std=0.01):
+        super().__init__()
+        self.std = std
+
+    def forward(self, x):
+        if self.training:
+            noise = torch.randn_like(x) * self.std
+            return x + noise
+        return x
+
+
+class MultiTaskUncertaintyLoss(nn.Module):
+    """Learns the relative weights of multiple tasks using homoscedastic uncertainty"""
+    def __init__(self, num_tasks=3):
+        super().__init__()
+        self.log_vars = nn.Parameter(torch.zeros(num_tasks))
+
+    def forward(self, predictions, targets):
+        loss = 0
+        for i in range(len(self.log_vars)):
+            precision = torch.exp(-self.log_vars[i])
+            diff = (predictions[:, i] - targets[:, i])**2
+            loss += precision * diff.mean() + self.log_vars[i]
+        return loss.mean()
+
+
+class ResidualBlock(nn.Module):
+    def __init__(self, dim, dropout=0.2):
+        super().__init__()
+        self.block = nn.Sequential(
+            nn.Linear(dim, dim),
+            nn.LayerNorm(dim), # LayerNorm often superior for embeddings
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(dim, dim),
+            nn.LayerNorm(dim)
+        )
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        return self.relu(x + self.block(x))
+
+
+class MultiHeadRegressionModel(nn.Module):
+    def __init__(self, input_dim, output_dim, hidden_dim=256, dropout=0.2):
+        super().__init__()
+        
+        # Robustness: Add Small Jitter to Embeddings
+        self.noise = GaussianNoise(std=0.01)
+        
+        # Feature Focusing: Weight dimensions of the embedding
+        self.input_gate = EmbeddingAttention(input_dim)
+        
+        # Shared Context Encoder: Learns general environmental patterns
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.ReLU(),
+            ResidualBlock(hidden_dim, dropout),
+            ResidualBlock(hidden_dim, dropout),
+            ResidualBlock(hidden_dim, dropout), # Added depth
+            nn.Linear(hidden_dim, hidden_dim // 2),
+            nn.LayerNorm(hidden_dim // 2),
+            nn.ReLU()
+        )
+        
+        # Individual heads for each target (NBR, NDMI, NDWI)
+        self.heads = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(hidden_dim // 2, hidden_dim // 4),
+                nn.ReLU(),
+                nn.Dropout(dropout / 2),
+                nn.Linear(hidden_dim // 4, 1),
+                nn.Tanh()
+            ) for _ in range(output_dim)
+        ])
+
+    def forward(self, x):
+        x = self.noise(x)
+        gated_input = self.input_gate(x)
+        shared_features = self.encoder(gated_input)
+        return torch.cat([head(shared_features) for head in self.heads], dim=1)
 
 
 # Early stopping class
@@ -89,9 +174,10 @@ class RegressionDataset(Dataset):
 
 
 # Training function
-def train_epoch(model, dataloader, criterion, optimizer, device):
+def train_epoch(model, dataloader, criterion, optimizer, device, clip_grad=1.0):
     model.train()
     total_loss = 0
+    total_mse = 0
     
     for X_batch, y_batch in dataloader:
         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
@@ -100,29 +186,38 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         optimizer.zero_grad()
         predictions = model(X_batch)
         loss = criterion(predictions, y_batch)
+        mse = torch.nn.functional.mse_loss(predictions, y_batch)
         
         # Backward pass
         loss.backward()
+        
+        # Gradient clipping to ensure stability and prevent extreme updates
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
+        
         optimizer.step()
         
         total_loss += loss.item()
+        total_mse += mse.item()
     
-    return total_loss / len(dataloader)
+    return total_loss / len(dataloader), total_mse / len(dataloader)
 
 
 # Validation function
 def validate_epoch(model, dataloader, criterion, device):
     model.eval()
     total_loss = 0
+    total_mse = 0
     
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             predictions = model(X_batch)
             loss = criterion(predictions, y_batch)
+            mse = torch.nn.functional.mse_loss(predictions, y_batch)
             total_loss += loss.item()
+            total_mse += mse.item()
     
-    return total_loss / len(dataloader)
+    return total_loss / len(dataloader), total_mse / len(dataloader)
 
 
 # Function to create prediction plots
@@ -167,16 +262,15 @@ def create_prediction_plots(model, dataloader, scaler_y, ycols, device, epoch, m
         axes[i].legend()
         
         # Calculate and display metrics
-        from sklearn.metrics import r2_score, mean_squared_error
-        r2 = r2_score(targets_original[:, i], predictions_original[:, i])
-        rmse = np.sqrt(mean_squared_error(targets_original[:, i], predictions_original[:, i]))
+        r2_val = r2_score(targets_original[:, i], predictions_original[:, i])
+        rmse_val = np.sqrt(mean_squared_error(targets_original[:, i], predictions_original[:, i]))
         
         # Show value ranges
         pred_min, pred_max = predictions_original[:, i].min(), predictions_original[:, i].max()
         actual_min, actual_max = targets_original[:, i].min(), targets_original[:, i].max()
         
         axes[i].text(0.05, 0.95, 
-                    f'R² = {r2:.4f}\nRMSE = {rmse:.4f}\nPred range: [{pred_min:.3f}, {pred_max:.3f}]\nActual range: [{actual_min:.3f}, {actual_max:.3f}]',
+                    f'R² = {r2_val:.4f}\nRMSE = {rmse_val:.4f}\nPred range: [{pred_min:.3f}, {pred_max:.3f}]\nActual range: [{actual_min:.3f}, {actual_max:.3f}]',
                     transform=axes[i].transAxes,
                     verticalalignment='top',
                     fontsize=8,
@@ -191,18 +285,29 @@ def main():
     # Set all random seeds
     seed_all(42)
     
+    # Data source definition
+    dataset_name = "dfsubsetNatural.csv"
+    
     # Initialize wandb
     wandb.init(
         project="expected_Ref_Model",
         config={
-            "architecture": "MLP",
-            "hidden_dims": [128, 64, 32],
+            "architecture": "UncertaintyAttentionalResidualMLP",
+            "hidden_dim": 256,
             "learning_rate": 0.001,
-            "epochs": 100,
+            "epochs": 150,
             "batch_size": 64,
-            "optimizer": "Adam",
+            "optimizer": "AdamW",
             "dropout": 0.2,
-            "early_stopping_patience": 15,
+            "weight_decay": 1e-2, # AdamW typically uses higher weight decay (e.g., 0.01)
+            "input_noise_std": 0.01,
+            "early_stopping_patience": 25,
+            "data_source": dataset_name,
+            "output_activation": "tanh",
+            "encoder_norm": "LayerNorm",
+            "scheduler": "CosineAnnealingWarmRestarts",
+            "warmup_epochs": 5,
+            "warmup_start_lr_factor": 0.01, # Start LR at 1% of base LR
         }
     )
     config = wandb.config
@@ -210,7 +315,12 @@ def main():
     # Load data
     import os
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(base_dir, "data", "extracted_indices.csv")
+    
+    # Ensure necessary directories exist
+    os.makedirs(os.path.join(base_dir, "models"), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, "plots"), exist_ok=True)
+    
+    data_path = os.path.join(base_dir, "data", dataset_name)
     df = pd.read_csv(data_path)
     
     # Define feature and target columns
@@ -246,8 +356,9 @@ def main():
     X_val = scaler_X.transform(X_val)
     X_test = scaler_X.transform(X_test)
     
-    # Optionally standardize targets (recommended for regression)
-    scaler_y = StandardScaler()
+    # Use MinMaxScaler for targets to match Tanh output range [-1, 1]
+    # Scaling to [-0.95, 0.95] helps avoid Tanh saturation at the edges
+    scaler_y = MinMaxScaler(feature_range=(-0.95, 0.95))
     y_train = scaler_y.fit_transform(y_train)
     y_val = scaler_y.transform(y_val)
     y_test = scaler_y.transform(y_test)
@@ -258,7 +369,7 @@ def main():
     test_dataset = RegressionDataset(X_test, y_test)
     
     batch_size = config.batch_size
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     
@@ -267,30 +378,49 @@ def main():
     print(f"Using device: {device}")
     wandb.config.update({"device": str(device)})
     
-    # Initialize model
     input_dim = len(Xcols)
     output_dim = len(ycols)
-    model = RegressionModel(input_dim, output_dim, hidden_dims=config.hidden_dims).to(device)
+    
+    # Initialize Multi-Head model and apply weights
+    model = MultiHeadRegressionModel(
+        input_dim, 
+        output_dim, 
+        hidden_dim=config.hidden_dim, 
+        dropout=config.dropout
+    ).to(device)
+    model.apply(init_weights)
     
     print(f"\nModel architecture:\n{model}")
     wandb.watch(model, log="all", log_freq=100)
     
-    # Loss function and optimizer
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10)
+    # Multi-Task Loss and AdamW Optimizer
+    criterion = MultiTaskUncertaintyLoss(num_tasks=output_dim).to(device)
+    # Separate params to avoid weight decay on uncertainty log_vars (which should move freely)
+    optimizer = optim.AdamW([
+        {'params': model.parameters(), 'weight_decay': config.weight_decay},
+        {'params': criterion.parameters(), 'weight_decay': 0.0}
+    ], lr=config.learning_rate)
+    
+    # Modern Scheduler: Cosine Annealing with Warm Restarts
+    # This helps the model jump out of local minima
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, 
+        T_0=10,    # First restart after 10 epochs
+        T_mult=2,  # Double the cycle length each time
+        eta_min=1e-6
+    )
     early_stopping = EarlyStopping(patience=config.early_stopping_patience, min_delta=1e-6, mode='min')
     
     # Training loop
     num_epochs = config.epochs
-    best_val_loss = float('inf')
+    best_val_mse = float('inf')
     train_losses = []
     val_losses = []
     
     print("\nStarting training...")
     for epoch in tqdm(range(num_epochs), desc="Training"):
-        train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
-        val_loss = validate_epoch(model, val_loader, criterion, device)
+        train_loss, train_mse = train_epoch(model, train_loader, criterion, optimizer, device, clip_grad=1.0)
+        val_loss, val_mse = validate_epoch(model, val_loader, criterion, device)
         
         train_losses.append(train_loss)
         val_losses.append(val_loss)
@@ -299,40 +429,59 @@ def main():
         current_lr = optimizer.param_groups[0]['lr']
         
         # Log to wandb
-        wandb.log({
+        log_payload = {
             'epoch': epoch,
-            'train_loss': train_loss,
+            'total_train_loss': train_loss,
+            'train_mse': train_mse,
             'val_loss': val_loss,
+            'val_mse': val_mse,
             'learning_rate': current_lr,
-        })
+        }
+        
+        # Log learned weights (variances) for each task
+        with torch.no_grad():
+            for i, col in enumerate(ycols):
+                log_payload[f'task_weight_{col}'] = torch.exp(-criterion.log_vars[i]).item()
+        
+        wandb.log(log_payload)
         
         # Learning rate scheduling
-        scheduler.step(val_loss)
+        # Learning rate scheduling (CosineAnnealingWarmRestarts uses internal epoch count)
+        scheduler.step()
         
-        # Save best model
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
+        # Save best model based on MSE
+        if val_mse < best_val_mse:
+            best_val_mse = val_mse
             best_model_path = os.path.join(base_dir, "models", "best_model.pth")
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': val_loss,
+                'val_mse': val_mse,
                 'scaler_X': scaler_X,
                 'scaler_y': scaler_y,
+                'data_source': config.data_source,
             }, best_model_path)
             wandb.save(best_model_path)
         
         if (epoch + 1) % 10 == 0:
-            print(f"\nEpoch [{epoch+1}/{num_epochs}] - Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}, LR: {current_lr:.6f}")
+            print(f"\nEpoch [{epoch+1}/{num_epochs}] - Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}, Train MSE: {train_mse:.6f}, Val MSE: {val_mse:.6f}, LR: {current_lr:.6f}")
             
             # Create and log prediction plots to wandb
+            # Using a buffer to avoid temp file issues on Windows with wandb.Image(fig)
+            from io import BytesIO
+            from PIL import Image
             fig = create_prediction_plots(model, val_loader, scaler_y, ycols, device, epoch+1)
-            wandb.log({f"predictions_epoch_{epoch+1}": wandb.Image(fig)})
+            buf = BytesIO()
+            fig.savefig(buf, format='png', bbox_inches='tight')
+            buf.seek(0)
+            img = Image.open(buf)
+            wandb.log({f"predictions_epoch_{epoch+1}": wandb.Image(img)})
             plt.close(fig)
         
-        # Early stopping check
-        if early_stopping(val_loss):
+        # Early stopping check based on MSE
+        if early_stopping(val_mse):
             print(f"\nEarly stopping triggered at epoch {epoch+1}")
             wandb.log({'early_stopped_epoch': epoch})
             break
@@ -342,12 +491,13 @@ def main():
     model.load_state_dict(checkpoint['model_state_dict'])
     
     # Evaluate on test set
-    test_loss = validate_epoch(model, test_loader, criterion, device)
+    test_loss, test_mse = validate_epoch(model, test_loader, criterion, device)
     print(f"\n{'='*60}")
-    print("MODEL PERFORMANCE")
+    print("MODEL PERFORMANCE (DEBUG-FIX-V1)")
     print(f"{'='*60}")
-    print(f"Test Loss (MSE): {test_loss:.6f}")
-    print(f"Test RMSE: {np.sqrt(test_loss):.6f}")
+    print(f"Test Loss (Uncertainty): {test_loss:.6f}")
+    print(f"Test MSE: {test_mse:.6f}")
+    print(f"Test RMSE: {np.sqrt(test_mse):.6f}")
     
     # Calculate baseline metrics
     print(f"\n{'='*60}")
@@ -374,13 +524,29 @@ def main():
     print(f"  MSE:  {median_mse:.6f}")
     print(f"  RMSE: {median_rmse:.6f}")
     
-    # Calculate improvement over baselines
-    improvement_over_mean = ((mean_mse - test_loss) / mean_mse) * 100
-    improvement_over_median = ((median_mse - test_loss) / median_mse) * 100
+    # Linear Probe Baseline (OLS)
+    print(f"\n{'='*60}")
+    print("LINEAR PROBE BASELINE (OLS)")
+    print(f"{'='*60}")
+    linear_probe = LinearRegression()
+    linear_probe.fit(X_train, y_train)
+    y_test_linear = linear_probe.predict(X_test)
+    linear_mse = mean_squared_error(y_test, y_test_linear)
+    linear_rmse = np.sqrt(linear_mse)
+    print(f"Linear Probe MSE: {linear_mse:.6f}")
+    print(f"Linear Probe RMSE: {linear_rmse:.6f}")
     
-    print(f"\nModel Improvement:")
+    # Calculate improvement over Baselines (using MSE)
+    improvement_over_mean = ((mean_mse - test_mse) / mean_mse) * 100
+    improvement_over_median = ((median_mse - test_mse) / median_mse) * 100
+    improvement_over_linear = ((linear_mse - test_mse) / linear_mse) * 100
+    
+    print(f"\nModel Improvement (based on MSE) [FIXED]:")
     print(f"  vs Mean Baseline:   {improvement_over_mean:+.2f}%")
     print(f"  vs Median Baseline: {improvement_over_median:+.2f}%")
+    print(f"  vs Linear Probe:    {improvement_over_linear:+.2f}%")
+    
+    wandb.run.summary["improvement_vs_linear_probe"] = improvement_over_linear
     
 
     
@@ -418,14 +584,15 @@ def main():
     median_predictions_original = np.tile(y_train_median_original, (len(targets_original), 1))
     
     # Per-target metrics
-    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-    
     print("\nPer-Target Performance:")
     print(f"{'Target':<10} {'Metric':<8} {'Model':<12} {'Mean BL':<12} {'Median BL':<12} {'Improvement':<12}")
     print("-" * 80)
     
-    # Dictionary to store metrics for wandb
-    wandb_metrics = {}
+    # List for summary table
+    table_data = []
+    
+    # Calculate linear probe baseline in original scale (using pre-calculated multi-target results)
+    y_test_linear_original = scaler_y.inverse_transform(y_test_linear)
     
     for i, col in enumerate(ycols):
         # Model metrics
@@ -443,24 +610,44 @@ def main():
         median_bl_mae = mean_absolute_error(targets_original[:, i], median_predictions_original[:, i])
         median_bl_r2 = r2_score(targets_original[:, i], median_predictions_original[:, i])
         
-        # Calculate improvements
+        # Per-target improvements
         mse_imp_mean = ((mean_bl_mse - model_mse) / mean_bl_mse) * 100
         mse_imp_median = ((median_bl_mse - model_mse) / median_bl_mse) * 100
         
-        # Log to wandb
-        wandb_metrics[f'{col}_mse'] = model_mse
-        wandb_metrics[f'{col}_mae'] = model_mae
-        wandb_metrics[f'{col}_r2'] = model_r2
-        wandb_metrics[f'{col}_improvement_vs_mean'] = mse_imp_mean
-        wandb_metrics[f'{col}_improvement_vs_median'] = mse_imp_median
+        # Per-target Linear Probe performance
+        lp_mse = mean_squared_error(targets_original[:, i], y_test_linear_original[:, i])
+        mse_imp_linear = ((lp_mse - model_mse) / lp_mse) * 100
+
+        # Add to summary table data
+        table_data.append([
+            col,
+            model_mse,
+            model_mae,
+            model_r2,
+            mse_imp_mean,
+            mse_imp_median,
+            mse_imp_linear
+        ])
         
-        print(f"{col:<10} {'MSE':<8} {model_mse:<12.6f} {mean_bl_mse:<12.6f} {median_bl_mse:<12.6f} {mse_imp_mean:>+6.2f}% / {mse_imp_median:>+6.2f}%")
+        # Log to wandb summary (this makes them appear in the W&B Run Table/Grid)
+        wandb.run.summary[f"test_{col}_mse"] = model_mse
+        wandb.run.summary[f"test_{col}_mae"] = model_mae
+        wandb.run.summary[f"test_{col}_r2"] = model_r2
+        wandb.run.summary[f"test_{col}_imp_vs_linear"] = mse_imp_linear
+        
+        print(f"{col:<10} {'MSE':<8} {model_mse:<12.6f} {mean_bl_mse:<12.6f} {lp_mse:<12.6f} {mse_imp_linear:>+6.2f}%")
         print(f"{'':<10} {'MAE':<8} {model_mae:<12.6f} {mean_bl_mae:<12.6f} {median_bl_mae:<12.6f}")
         print(f"{'':<10} {'R²':<8} {model_r2:<12.6f} {mean_bl_r2:<12.6f} {median_bl_r2:<12.6f}")
         print()
     
-    # Log final metrics to wandb
-    wandb.log(wandb_metrics)
+    # Log Media Table to W&B
+    table_columns = ["Target", "MSE", "MAE", "R2", "Imp. vs Mean %", "Imp. vs Median %", "Imp. vs Linear %"]
+    metrics_table = wandb.Table(columns=table_columns, data=table_data)
+    wandb.log({"final_performance_summary": metrics_table})
+    
+    # Small pause to ensure wandb syncs the final heavy logs
+    import time
+    time.sleep(2)
     
     # Plot predictions vs actual for each target
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))

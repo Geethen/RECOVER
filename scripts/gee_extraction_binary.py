@@ -94,7 +94,7 @@ def get_natural_mask(roi):
     nf_nat = probabilities.gte(0.52).rename('natural')
 
     # Combine masks
-    natural_mask = sbtn_nat.Or(nf_nat).And(ghm_nat).And(bii_nat).selfMask().rename('natural')
+    natural_mask = sbtn_nat.Or(nf_nat).And(ghm_nat).And(bii_nat).rename('natural')
 
     return natural_mask
 

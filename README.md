@@ -50,5 +50,23 @@ Evaluate the trained model using `scripts/evaluate_model.py`.
 python scripts/evaluate_model.py
 ```
 
+#### 4. Reference Condition Prediction
+Predict reference states and uncertainty intervals using `scripts/predict_reference_conditions.py`.
+```bash
+python scripts/predict_reference_conditions.py
+```
+
+#### 5. Benchmarking
+Select similar natural sites (benchmarks) and calculate the Benchmarked Condition Index (BCI) using `scripts/select_benchmark_sites.py`.
+```bash
+python scripts/select_benchmark_sites.py
+```
+
+#### 6. Visualization
+Generate benchmarking distribution plots using `scripts/plot_benchmarking_results.py`.
+```bash
+python scripts/plot_benchmarking_results.py
+```
+
 ## License
 MIT
