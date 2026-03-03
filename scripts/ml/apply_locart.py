@@ -101,7 +101,7 @@ def load_data(base_dir, natural_data_path, full_data_path, labels_data_path):
     
     # 1. Load Natural Data (Used for Training & LOCART)
     print(f"Loading natural data from {natural_data_path}...")
-    df_nat = pd.read_csv(natural_data_path)
+    df_nat = pd.read_parquet(natural_data_path)
     Xcols = [f'A{i:02d}' for i in range(64)]
     ycols = ['NBR', 'NDMI', 'NDWI']
     
@@ -122,8 +122,8 @@ def load_data(base_dir, natural_data_path, full_data_path, labels_data_path):
 
     # 2. Load Transformed Data (For Width prediction only)
     print("\nLoading full dataset to identify transformed areas...")
-    df_full = pd.read_csv(full_data_path)
-    df_labels = pd.read_csv(labels_data_path)
+    df_full = pd.read_parquet(full_data_path)
+    df_labels = pd.read_parquet(labels_data_path)
     
     if 'geo' in df_full.columns and 'geo' in df_labels.columns:
         df_merged = pd.merge(df_full, df_labels[['geo', 'natural']], on='geo', how='inner')
@@ -192,9 +192,9 @@ def main():
     # --- Paths ---
     base_dir = r"C:\Users\coach\myfiles\postdoc2\code"
     model_path = os.path.join(base_dir, "models", "best_model.pth")
-    natural_data_path = os.path.join(base_dir, "data", "dfsubsetNatural.csv")
-    full_data_path = os.path.join(base_dir, "data", "extracted_indices.csv")
-    labels_data_path = os.path.join(base_dir, "data", "extracted_natural_labels.csv")
+    natural_data_path = os.path.join(base_dir, "data", "dfsubsetNatural.parquet")
+    full_data_path = os.path.join(base_dir, "data", "extracted_indices.parquet")
+    labels_data_path = os.path.join(base_dir, "data", "extracted_natural_labels.parquet")
     output_dir = os.path.join(base_dir, "models", "locart_comparison")
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.join(base_dir, "plots", "locart_comparison"), exist_ok=True)

@@ -286,7 +286,7 @@ def main():
     seed_all(42)
     
     # Data source definition
-    dataset_name = "dfsubsetNatural.csv"
+    dataset_name = "dfsubsetNatural.parquet"
     
     # Initialize wandb
     wandb.init(
@@ -321,7 +321,7 @@ def main():
     os.makedirs(os.path.join(base_dir, "plots"), exist_ok=True)
     
     data_path = os.path.join(base_dir, "data", dataset_name)
-    df = pd.read_csv(data_path)
+    df = pd.read_parquet(data_path)
     
     # Define feature and target columns
     Xcols = ['A00', 'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08',

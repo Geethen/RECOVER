@@ -6,7 +6,7 @@ import numpy as np
 
 def plot_hcas_results(csv_path, output_dir):
     print(f"Loading benchmarked data from {csv_path}...")
-    df = pd.read_csv(csv_path)
+    df = pd.read_parquet(csv_path)
     
     # Check if new columns exist
     if 'HCAS_score' not in df.columns:
@@ -62,7 +62,7 @@ def plot_hcas_results(csv_path, output_dir):
 
 if __name__ == "__main__":
     BASE_DIR = r"C:\Users\coach\myfiles\postdoc2\code"
-    INPUT_FILE = os.path.join(BASE_DIR, "data", "benchmarked_condition.csv")
+    INPUT_FILE = os.path.join(BASE_DIR, "data", "benchmarked_condition.parquet")
     OUTPUT_DIR = os.path.join(BASE_DIR, "plots", "benchmarking")
     
     if os.path.exists(INPUT_FILE):

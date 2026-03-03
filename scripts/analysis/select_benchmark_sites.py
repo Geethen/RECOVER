@@ -28,7 +28,7 @@ def half_cauchy_weight(distance, lam=2.0):
 def select_benchmarks(data_path, output_path, shp_path):
     print(f"--- HCAS v3.1 Style Benchmarking (Optimized) ---")
     print(f"Loading data from {data_path}...")
-    df = pd.read_csv(data_path)
+    df = pd.read_parquet(data_path)
     
     # 1. Feature Definition
     # Benchmark selection uses PREDICTED REFERENCE values (environmental potential)
@@ -183,7 +183,7 @@ def select_benchmarks(data_path, output_path, shp_path):
     
     # Save CSV
     print(f"\nSaving results to {output_path}...")
-    df_final.to_csv(output_path, index=False)
+    df_final.to_parquet(output_path, index=False, compression="zstd", compression_level=3)
     
     # Save Shapefile
     print(f"Exporting HCAS scores to Shapefile: {shp_path}...")
@@ -199,8 +199,8 @@ def select_benchmarks(data_path, output_path, shp_path):
 
 if __name__ == "__main__":
     BASE_DIR = r"C:\Users\coach\myfiles\postdoc2\code"
-    INPUT_FILE = os.path.join(BASE_DIR, "data", "reference_departure_with_intervals.csv")
-    OUTPUT_FILE = os.path.join(BASE_DIR, "data", "benchmarked_condition.csv")
+    INPUT_FILE = os.path.join(BASE_DIR, "data", "reference_departure_with_intervals.parquet")
+    OUTPUT_FILE = os.path.join(BASE_DIR, "data", "benchmarked_condition.parquet")
     SHP_FILE = os.path.join(BASE_DIR, "data", "transformed_hcas.shp")
     
     if os.path.exists(INPUT_FILE):

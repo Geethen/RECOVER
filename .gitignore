@@ -33,9 +33,31 @@ wheels/
 models/*.pth
 !models/.gitkeep
 
+# Large data files
+**/*.parquet
+**/*.gpkg
+**/*.tif
+**/*.tiff
+**/*.nc
+**/*.h5
+**/*.hdf5
+**/*.zarr
+**/*.feather
+
+# Temp / intermediate outputs
+data/temp_features/
+data/validation/
+data/verification_plots/
+logs/
+
+# Checkpoint files
+**/*.checkpoint.json
 
 # Plots
-plots/*.png
+plots/
+data/**/*.png
+data/**/*.kml
+data/**/*.html
 
 # IDEs
 .vscode/

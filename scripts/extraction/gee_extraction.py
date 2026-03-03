@@ -265,6 +265,8 @@ def extract_efficiently(asset_id, output_csv, start_date='2022-01-01', end_date=
 if __name__ == "__main__":
     ASSET_ID = 'projects/ee-gsingh/assets/RECOVER/fscs_aef_samples'
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # NOTE: Extraction appends to a staging CSV, then convert_csv_to_parquet.py
+    # converts it to extracted_indices.parquet with optimised dtypes.
     OUTPUT_CSV = os.path.join(base_dir, "data", "extracted_indices.csv")
     
     print(f"Starting extraction for asset: {ASSET_ID}")

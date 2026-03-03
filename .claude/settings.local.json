@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/c/Users/coach/.conda/envs/erthy/python.exe\" -c \":*)",
+      "Bash(geeadd utils app2script --url \"https://jstnbraaten.users.earthengine.app/view/landsat-timeseries-explorer\" --outfile \"c:/Users/coach/myfiles/postdoc2/code/landsat_ts_explorer.js\")",
+      "Bash(\"/c/Users/coach/.conda/envs/erthy/python.exe\" c:/Users/coach/myfiles/postdoc2/code/test_hls_debug.py)"
+    ]
+  }
+}

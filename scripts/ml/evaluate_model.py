@@ -47,8 +47,8 @@ class RegressionDataset(Dataset):
 # Load data
 import os
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-data_path = os.path.join(base_dir, "data", "extracted_indices.csv")
-df = pd.read_csv(data_path)
+data_path = os.path.join(base_dir, "data", "extracted_indices.parquet")
+df = pd.read_parquet(data_path)
 
 Xcols = ['A00', 'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08',
          'A09', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18',

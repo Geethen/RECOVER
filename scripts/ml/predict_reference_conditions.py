@@ -98,14 +98,14 @@ def main():
     base_dir = r"C:\Users\coach\myfiles\postdoc2\code"
     model_checkpoint_path = os.path.join(base_dir, "models", "best_model.pth")
     locart_model_dir = os.path.join(base_dir, "models", "locart_comparison")
-    input_csv = os.path.join(base_dir, "data", "extracted_indices.csv")
-    labels_csv = os.path.join(base_dir, "data", "extracted_natural_labels.csv")
-    output_csv = os.path.join(base_dir, "data", "reference_departure_with_intervals.csv")
+    input_csv = os.path.join(base_dir, "data", "extracted_indices.parquet")
+    labels_csv = os.path.join(base_dir, "data", "extracted_natural_labels.parquet")
+    output_csv = os.path.join(base_dir, "data", "reference_departure_with_intervals.parquet")
 
     # --- Load Data ---
     print(f"Loading data from {input_csv} and labels from {labels_csv}...")
-    df = pd.read_csv(input_csv)
-    df_labels = pd.read_csv(labels_csv)
+    df = pd.read_parquet(input_csv)
+    df_labels = pd.read_parquet(labels_csv)
     
     # Merge to identify natural/transformed areas
     # Labels file has 'id', 'natural', 'geo'
@@ -202,7 +202,7 @@ def main():
             
     # --- Save ---
     print(f"Saving combined results to {output_csv}...")
-    df.to_csv(output_csv, index=False)
+    df.to_parquet(output_csv, index=False, compression="zstd", compression_level=3)
     
     # Summary Table for console
     print("\nPrediction Summary (Means):")
