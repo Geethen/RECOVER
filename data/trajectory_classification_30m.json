@@ -1,0 +1,26 @@
+{
+  "created": "2026-03-25",
+  "source": "abandoned_ag_gpp_2000_2022_SA.parquet",
+  "method": "Mann-Kendall trend test + Theil-Sen slope",
+  "time_series": "GPP and SVH, 2000-2022 (23 years)",
+  "standardization": "Per-ecoregion Z-score (within-chunk)",
+  "significance": "alpha = 0.05",
+  "niaps_excluded": true,
+  "natural_lc_only": true,
+  "crs": "EPSG:4326",
+  "resolution_m": 30.0,
+  "resolution_deg": 0.000269493,
+  "width_px": 60759,
+  "height_px": 43973,
+  "total_classified_pixels": 28312040,
+  "class_values": {
+    "0": "No data / NIAPS excluded",
+    "1": "Both recovering",
+    "2": "GPP recovering only",
+    "3": "SVH recovering only",
+    "4": "Stable",
+    "5": "GPP degrading only",
+    "6": "SVH degrading only",
+    "7": "Both degrading"
+  }
+}

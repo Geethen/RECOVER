@@ -283,7 +283,7 @@ def main():
     svh_list = []
     for y in years:
         # Get annual mosaic for SVH
-        svh_annual = gsvh_col.filter(ee.Filter.calendarRange(y, y, 'year')).mosaic().rename(f'SVH_{y}')
+        svh_annual = gsvh_col.filter(ee.Filter.calendarRange(y, y, 'year')).mosaic().multiply(0.1).rename(f'SVH_{y}')
         svh_list.append(svh_annual)
     
     svh_stack = ee.Image.cat(svh_list)
