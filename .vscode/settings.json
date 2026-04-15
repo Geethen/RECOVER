@@ -1,3 +1,4 @@
 {
-    "CodeGPT.apiKey": "Gemini CLI"
+    "CodeGPT.apiKey": "Gemini CLI",
+    "claudeCode.allowDangerouslySkipPermissions": true
 }

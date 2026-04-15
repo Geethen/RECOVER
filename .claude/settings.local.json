@@ -3,7 +3,15 @@
     "allow": [
       "Bash(\"/c/Users/coach/.conda/envs/erthy/python.exe\" -c \":*)",
       "Bash(geeadd utils app2script --url \"https://jstnbraaten.users.earthengine.app/view/landsat-timeseries-explorer\" --outfile \"c:/Users/coach/myfiles/postdoc2/code/landsat_ts_explorer.js\")",
-      "Bash(\"/c/Users/coach/.conda/envs/erthy/python.exe\" c:/Users/coach/myfiles/postdoc2/code/test_hls_debug.py)"
+      "Bash(\"/c/Users/coach/.conda/envs/erthy/python.exe\" c:/Users/coach/myfiles/postdoc2/code/test_hls_debug.py)",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" c:/Users/coach/myfiles/postdoc2/code/scripts/analysis/test_recovery_degree.py)",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" c:/Users/coach/myfiles/postdoc2/code/tmp_extract_sites.py)",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\explore_wpe_context.py\")",
+      "Read(//c/Users/coach/myfiles/postdoc2/data/**)",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\extraction\\\\extract_bioregion_ids.py\")",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\score_by_bioregion.py\")",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" -c \":*)",
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\generate_bioregion_narrative_plots.py\")"
     ]
   }
 }

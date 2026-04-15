@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Assessing Ecological Recovery on Abandoned Agricultural Land</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Assessing Ecological Recovery on Abandoned
+Agricultural Land</h1>
+</header>
+<h1
+id="assessing-ecological-recovery-on-abandoned-agricultural-land">Assessing
+Ecological Recovery on Abandoned Agricultural Land</h1>
+<h2 id="why-this-matters">Why This Matters</h2>
+<p>When agricultural land is abandoned, vegetation may begin to recover
+— but how do we know if recovery is actually happening, and how far
+along is it? This methodology answers two questions:</p>
+<ol type="1">
+<li><strong>Is this pixel recovering, stable, or degrading?</strong>
+(Trajectory classification)</li>
+<li><strong>How recovered is it compared to intact natural
+areas?</strong> (Recovery degree estimation)</li>
+</ol>
+<p>We apply this across ~33 million 30 m pixels of abandoned
+agricultural land in South Africa, using 23 years (2000–2022) of
+satellite-derived vegetation data.</p>
+<hr />
+<h2 id="part-1-classifying-trajectories">Part 1: Classifying
+Trajectories</h2>
+<h3 id="the-indicators">The Indicators</h3>
+<p>We track two complementary aspects of vegetation condition over
+time:</p>
+<ul>
+<li><strong>Gross Primary Productivity (GPP)</strong> — a measure of how
+much carbon vegetation is fixing through photosynthesis. This captures
+<em>functional</em> recovery: is the ecosystem becoming more productive?
+(<a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_global-pasture-watch_assets_ggpp-30m_v1_ugpp_m">GEE
+catalog</a> | <a
+href="https://doi.org/10.7717/peerj.19774">Paper</a>)</li>
+<li><strong>Short Vegetation Height (SVH)</strong> — the physical height
+of the vegetation canopy. This captures <em>structural</em> recovery: is
+vegetation biomass accumulating? (<a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_global-pasture-watch_assets_gsvh-30m_v1_short-veg-height_m">GEE
+catalog</a> | <a
+href="https://doi.org/10.1038/s41597-025-05739-6">Paper</a>)</li>
+</ul>
+<p>Both are derived from the Global Pasture Watch 30 m products,
+aggregated annually from 2000 to 2022, giving us a 23-point time series
+per pixel.</p>
+<h3 id="accounting-for-regional-differences">Accounting for Regional
+Differences</h3>
+<p>A pixel in the arid Karoo naturally has lower GPP than one in
+subtropical KwaZulu-Natal. To make trends comparable, we standardise
+each pixel’s time series relative to its ecoregion (using the <a
+href="https://developers.google.com/earth-engine/datasets/catalog/RESOLVE_ECOREGIONS_2017">RESOLVE
+2017 ecoregion boundaries</a> | <a
+href="https://doi.org/10.1093/biosci/bix014">Paper</a>).</p>
+<p>This is done through <strong>Z-score normalisation</strong>: for each
+ecoregion, we calculate the average GPP (or SVH) and the spread
+(standard deviation) across all pixels. Each pixel’s value is then
+re-expressed as “how many standard deviations above or below the
+ecoregion average?” For example, a Z-score of +1.5 means the pixel’s GPP
+is 1.5 standard deviations above its ecoregion average. This ensures
+we’re asking “is this pixel trending differently from its ecological
+neighbours?” rather than confusing trend with baseline productivity
+differences between biomes.</p>
+<h3 id="detecting-trends">Detecting Trends</h3>
+<p>For each pixel, we apply two well-established methods that make no
+assumptions about the shape of the data distribution (called
+“non-parametric” methods — they work regardless of whether the data
+follow a bell curve or any other particular pattern):</p>
+<p><strong>Theil-Sen slope</strong> estimates the rate of change over
+time. Imagine drawing a line between every possible pair of years in the
+23-year time series — that’s 253 pairs. Each line has a slope (rate of
+change). The Theil-Sen estimator takes the <em>median</em> (middle
+value) of all 253 slopes as the overall trend. Because it uses the
+median rather than the mean, it is resistant to outliers — a single
+extreme drought year or an unusual rainfall year will not distort the
+estimated trend.</p>
+<p><strong>Mann-Kendall test</strong> determines whether a trend is
+statistically significant (i.e., unlikely to be due to chance). It works
+by comparing every pair of years and asking a simple question: did the
+value go up or down? If the later year has a higher value, that pair is
+scored +1; if lower, -1; if the same, 0. All the scores are summed. In a
+truly trendless series, roughly half the pairs would go up and half
+would go down, so the sum would be near zero. A large positive sum means
+most pairs show increases — an upward trend. The test then calculates
+the probability (p-value) that such a strong pattern could arise purely
+by chance. If the p-value is below 0.05 (i.e., less than a 5% chance of
+occurring randomly), we conclude the trend is real.</p>
+<p>A pixel is classified as:</p>
+<table>
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Class</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recovering</strong></td>
+<td>Statistically significant increasing trend (p &lt; 0.05)</td>
+</tr>
+<tr>
+<td><strong>Degrading</strong></td>
+<td>Statistically significant decreasing trend (p &lt; 0.05)</td>
+</tr>
+<tr>
+<td><strong>Stable</strong></td>
+<td>No significant trend detected</td>
+</tr>
+</tbody>
+</table>
+<p>We classify GPP and SVH independently, then cross-tabulate. A pixel
+might show functional recovery (increasing GPP) but structural stability
+(no change in SVH), or vice versa.</p>
+<h3 id="what-we-found">What We Found</h3>
+<p>Across ~28 million natural and secondary-natural abandoned-ag
+pixels:</p>
+<ul>
+<li><strong>19.4%</strong> show recovery in at least one indicator</li>
+<li><strong>7.3%</strong> are recovering in both GPP and SVH
+simultaneously</li>
+<li><strong>63.0%</strong> are stable in both</li>
+<li><strong>5.2%</strong> are degrading in both</li>
+</ul>
+<p>Recovery and degradation rates vary substantially across ecoregions,
+reflecting differences in climate, soil, land-use history, and time
+since abandonment.</p>
+<hr />
+<h2 id="part-2-estimating-the-degree-of-recovery">Part 2: Estimating the
+Degree of Recovery</h2>
+<p>Knowing <em>that</em> a pixel is recovering is useful, but we also
+want to know <em>how far along</em> recovery is. A pixel with a
+significant positive GPP trend might still be far below natural
+conditions, or it might have nearly converged.</p>
+<h3 id="defining-natural">Defining “Natural”</h3>
+<p>Before measuring recovery, we need a clear definition of what counts
+as a natural reference site. We use a composite mask that combines four
+independent global datasets, requiring a pixel to satisfy
+<strong>all</strong> of the following:</p>
+<ul>
+<li><strong>Land classification</strong>: classified as natural land by
+the <a
+href="https://developers.google.com/earth-engine/datasets/catalog/WRI_SBTN_naturalLands_v1_1_2020">SBTN
+Natural Lands dataset</a> (WRI, 2020) <strong>OR</strong> classified as
+natural forest with probability &gt;= 0.52 in the <a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_nature-trace_assets_forest_typology_natural_forest_2020_v1_0_collection">Nature-Trace
+forest typology</a> (<a
+href="https://doi.org/10.1038/s41597-025-06097-z">Paper</a>)</li>
+<li><strong>Low human modification</strong>: <a
+href="https://developers.google.com/earth-engine/datasets/catalog/CSP_HM_GlobalHumanModification">Global
+Human Modification index</a> (GHM, Kennedy et al. | <a
+href="https://doi.org/10.1038/s41597-025-04892-2">Paper</a>) &lt;= 0.1,
+indicating very low human footprint — a value of 0.1 on the 0–1 scale
+means essentially no roads, settlements, agriculture, or other human
+infrastructure in the area</li>
+<li><strong>High biodiversity intactness</strong>: <a
+href="https://gee-community-catalog.org/projects/bii_africa/">Biodiversity
+Intactness Index</a> (BII) &gt;= 0.7, confirming the ecological
+community remains largely intact — this means at least 70% of the
+original species abundance is estimated to persist</li>
+</ul>
+<p>This composite mask was applied to a stratified sample of ~331,000
+points across South Africa, identifying ~97,000 points that meet all
+criteria as the natural reference subset. This is an independent dataset
+— not drawn from the abandoned-ag pixels being assessed.</p>
+<p>For any given ecoregion, the analysis uses only natural reference
+pixels from that same ecoregion. For the Highveld Grasslands, this means
+59,195 natural reference pixels.</p>
+<h3 id="the-reference-data">The Reference Data</h3>
+<p>The natural reference pixels carry two types of information:</p>
+<ul>
+<li><strong>GPP and SVH time series</strong> (2000–2022) — from the same
+Global Pasture Watch products used for the abandoned-ag pixels</li>
+<li><strong>AlphaEarth 64D embeddings</strong> — a compact numerical
+signature of each pixel’s landscape characteristics (see Metric C
+below)</li>
+</ul>
+<p>Transformed reference pixels (cropland, built-up, plantations, mines)
+from the same ecoregion provide a contrasting baseline for interpreting
+results.</p>
+<h3 id="the-metrics">The Metrics</h3>
+<p>We use three metrics (A, B, C), each capturing a different dimension
+of recovery. To make them comparable, each is expressed as a
+<strong>percentile within the natural distribution</strong>.</p>
+<p><strong>What does percentile normalisation mean?</strong> Imagine
+lining up all the natural reference pixels from worst to best on a given
+metric. The test pixel (recovering pixel) is then placed in this line.
+Its percentile is the fraction of natural pixels it outperforms. For
+example, if a test pixel scores higher than 75 out of 100 natural
+pixels, its percentile is 75. This approach transforms all metrics onto
+a common 0–100 scale:</p>
+<ul>
+<li><strong>50</strong> = the test pixel matches the median (typical)
+natural condition</li>
+<li><strong>Below 50</strong> = still below the typical natural
+level</li>
+<li><strong>Above 50</strong> = above the natural median</li>
+<li><strong>Near 0</strong> = worse than almost all natural pixels</li>
+<li><strong>Near 100</strong> = better than almost all natural
+pixels</li>
+</ul>
+<h3 id="metric-a-percentile-rank">Metric A: Percentile Rank</h3>
+<p>The simplest and most intuitive measure. We compute the test pixel’s
+mean GPP (or SVH) over the most recent five years (2018–2022), then ask:
+where does this value fall within the distribution of natural reference
+pixels in the same ecoregion?</p>
+<ul>
+<li><strong>50th percentile</strong> = the test pixel matches the median
+natural condition</li>
+<li><strong>Below 50</strong> = still below typical natural levels</li>
+<li><strong>Above 50</strong> = above the natural median (possible
+overshoot, e.g. in highly productive but not yet structurally diverse
+grasslands)</li>
+</ul>
+<h3 id="metric-b-comparison-to-nearest-natural-neighbours">Metric B:
+Comparison to Nearest Natural Neighbours</h3>
+<p>Ecoregions are large and internally variable — a valley floor will
+have different natural productivity than a hilltop, even within the same
+ecoregion. To account for this local variation, Metric B finds the
+<strong>10 closest natural pixels within 50 km</strong> of the test
+pixel (using geographic distance) and computes the ratio of the test
+pixel’s recent productivity to the mean of these neighbours.</p>
+<ul>
+<li>A ratio of <strong>1.0</strong> means the test pixel matches its
+local natural neighbours</li>
+<li>A ratio of <strong>0.7</strong> means it is at 70% of local natural
+productivity</li>
+<li>A ratio of <strong>1.2</strong> means it exceeds local natural
+conditions by 20%</li>
+</ul>
+<p>This ratio is then percentile-normalised by comparing it to the
+ratios observed across all natural pixels relative to the ecoregion
+mean.</p>
+<h3 id="metric-c-landscape-similarity-via-alphaearth-embeddings">Metric
+C: Landscape Similarity via AlphaEarth Embeddings</h3>
+<p>GPP and SVH tell us about productivity and structure, but ecosystems
+differ in ways these two variables cannot fully describe — species
+composition, canopy texture and layering, seasonal growth patterns, soil
+exposure, moisture regimes. To capture this broader ecological signal,
+we use <strong>embeddings</strong> from the <a
+href="https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL">AlphaEarth
+Foundations model</a> (Google DeepMind | <a
+href="https://deepmind.google/blog/alphaearth-foundations-helps-map-our-planet-in-unprecedented-detail/">Blog</a>).</p>
+<p><strong>What is an embedding?</strong> Think of it as a fingerprint
+for a piece of land. The AlphaEarth model ingests a full year of
+satellite observations from multiple sources:</p>
+<table>
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Data source</th>
+<th>What it captures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED">Sentinel-2</a>
+multispectral imagery</td>
+<td>Vegetation type, health, phenology, soil</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_L2">Landsat
+8 and 9</a></td>
+<td>Additional spectral bands, thermal, longer archive</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD">Sentinel-1</a>
+C-band SAR radar</td>
+<td>Vegetation structure, moisture (sees through clouds)</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/JAXA_ALOS_PALSAR-2_Level2_2_ScanSAR">ALOS
+PALSAR-2</a> L-band radar</td>
+<td>Woody biomass, forest structure</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/LARSE_GEDI_GEDI02_A_002_MONTHLY">GEDI</a>
+lidar-derived canopy height</td>
+<td>Vertical vegetation structure</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_DEM_GLO30">Copernicus
+GLO-30</a> elevation model</td>
+<td>Terrain, slope, aspect</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR">ERA5-Land</a>
+climate data</td>
+<td>Temperature, precipitation, seasonality</td>
+</tr>
+<tr>
+<td><a href="https://grace.jpl.nasa.gov/">GRACE</a> gravity data</td>
+<td>Groundwater and hydrological changes</td>
+</tr>
+</tbody>
+</table>
+<p>The model distils all this information into a single vector of 64
+numbers per pixel at 10 m resolution. Two pixels with similar vectors
+have similar overall landscape characteristics across all these data
+streams. This is analogous to how DNA barcoding can identify species
+similarity — the embedding captures the overall “identity” of a
+landscape.</p>
+<p><strong>How do we compare embeddings?</strong> We use <strong>cosine
+similarity</strong> — a measure of how similar two vectors are in
+direction. It ranges from 0 (completely different) to 1 (identical). For
+landscape embeddings, values typically fall between 0.75 and 0.95, where
+higher values mean more similar landscapes.</p>
+<p>We compute this at two spatial scales:</p>
+<p><strong>Ecoregion scope (C_eco)</strong>: How similar is the test
+pixel’s embedding to all natural reference pixels across the ecoregion?
+This is normalised by computing how similar natural pixels are to
+<em>each other</em> — if the test pixel is as similar to natural as
+natural pixels are to one another, it suggests convergence to a natural
+state.</p>
+<p><strong>Local scope (C_local)</strong>: How similar is the test pixel
+to the same 10 nearest natural neighbours used in Metric B? Normalised
+against a baseline of how similar natural pixels typically are to
+<em>their own</em> local neighbours.</p>
+<p><strong>What does Metric C add beyond GPP and SVH?</strong> A
+recovering pixel might have regained its productivity (high Metric A)
+but still look fundamentally different in its vegetation structure,
+species composition, or seasonal patterns — all things that affect
+biodiversity, ecosystem function, and long-term resilience. Lower C
+scores relative to A and B scores suggest productivity has returned but
+the ecosystem has not yet fully converged to a natural-like composition
+or structure.</p>
+<h3 id="combining-the-metrics">Combining the Metrics</h3>
+<p>Each metric produces a percentile score (0–100). We average these
+into a single composite:</p>
+<p><strong>Recovery Score = mean of all metric percentiles</strong></p>
+<p>computed separately for GPP and SVH, then averaged into an overall
+score. A score of 50 means the pixel is indistinguishable from the
+median natural condition across all metrics.</p>
+<hr />
+<h2 id="worked-example-single-pixel-assessment">Worked Example: Single
+Pixel Assessment</h2>
+<p>The figures below show a recovery degree assessment for a single
+pixel in the Highveld Grasslands (pixel_id 98483, -25.90°S, 28.97°E — <a
+href="https://www.google.com/maps/place/-25.899,28.968/@-25.899,28.968,1500m/data=!3m1!1e3">Google
+Maps</a> | <a
+href="https://earth.google.com/web/search/-25.899,28.968">Google
+Earth</a> | <a
+href="https://livingatlas.arcgis.com/wayback/#mapCenter=28.968,-25.899,16">Esri
+Wayback</a>). For context, natural reference pixels in this ecoregion
+have a median GPP of 914 gC/m2/yr and a median SVH of 1.10 m.</p>
+<h3 id="comparison-plot">Comparison plot</h3>
+<figure>
+<img src="../plots/recovery_degree_comparison.png"
+alt="Recovery degree comparison" />
+<figcaption aria-hidden="true">Recovery degree comparison</figcaption>
+</figure>
+<p><strong>Top left — GPP trajectory (2000–2022)</strong>: The red line
+shows the test pixel’s GPP over time. The green dashed line and shaded
+band show the natural reference mean +/- 1 standard deviation. The
+orange dashed line is the transformed (non-natural) mean, and the blue
+dashed line is the mean of the 10 nearest natural neighbours. This
+pixel’s GPP has been consistently above the natural mean since around
+2005, indicating strong productivity recovery.</p>
+<p><strong>Top right — SVH trajectory</strong>: Same layout for
+vegetation height. The test pixel shows a more variable trajectory with
+generally above-natural-average vegetation height.</p>
+<p><strong>Bottom left — Percentile bar chart</strong>: Each metric’s
+percentile score, split into GPP (red) and SVH (blue). The grey dashed
+line marks the 50th percentile (natural median). Metrics A and B are
+well above 50 (strong productivity and structural recovery), while
+Metric C (embedding similarity) is below 50 (the landscape fingerprint
+has not yet converged to natural). The orange triangles show where
+transformed (non-natural) pixels fall for Metric A — well below the test
+pixel.</p>
+<p><strong>Bottom right — Summary table</strong>: Raw values, percentile
+scores, and the composite recovery score. The table also shows the
+gradient position (0 = transformed, 1 = natural median).</p>
+<h3 id="diagnostic-plot">Diagnostic plot</h3>
+<figure>
+<img src="../plots/recovery_degree_diagnostic.png"
+alt="Recovery degree diagnostic" />
+<figcaption aria-hidden="true">Recovery degree diagnostic</figcaption>
+</figure>
+<p><strong>Top left — GPP histogram</strong>: The distribution of
+late-period (2018–2022) mean GPP for natural (green) and transformed
+(orange) pixels, with the test pixel marked in red. The green dashed
+line marks the natural median. This test pixel clearly falls in the
+upper tail of the natural distribution.</p>
+<p><strong>Top right — SVH histogram</strong>: Same layout for
+vegetation height.</p>
+<p><strong>Top far right — Spatial map</strong>: The locations of all
+natural reference pixels (green dots), transformed reference pixels
+(orange), the 10 nearest natural neighbours (blue circles), and the test
+pixel (red star). The dashed circle shows the 50 km search radius used
+for KNN selection.</p>
+<p><strong>Bottom left &amp; centre — Time series spaghetti
+plots</strong>: Individual natural pixel time series (faint green lines)
+overlaid with the natural mean (green dashed), transformed mean
+(orange), KNN mean (blue), and test pixel (red). These plots show
+whether the test pixel’s trajectory is converging toward the natural
+range or remains distinct.</p>
+<p><strong>Bottom right — GPP vs SVH scatter</strong>: Bivariate view of
+where the test pixel sits relative to natural and transformed pixels in
+functional-structural space. Natural pixels cluster in one region; the
+test pixel may overlap or sit outside this cloud, indicating whether
+recovery is balanced across both dimensions.</p>
+<hr />
+<h2
+id="worked-example-three-contrasting-pixels-from-the-batch-run">Worked
+Example: Three Contrasting Pixels from the Batch Run</h2>
+<p>To illustrate how the metrics separate different stages of recovery,
+here are three real pixels from the Highveld Grasslands batch run
+(317,811 recovering pixels scored). For context, natural reference
+medians are: GPP = 914 gC/m2/yr, SVH = 1.10 m.</p>
+<hr />
+<h3 id="pixel-a-moderate-recovery-score-53.6">Pixel A — Moderate
+recovery (score: 53.6)</h3>
+<p><strong>Location</strong>: -32.16°S, 26.62°E | Secondary natural
+(SANLC class 2) | <a
+href="https://www.google.com/maps/place/-32.163,26.624/@-32.163,26.624,1500m/data=!3m1!1e3">Google
+Maps</a> | <a
+href="https://earth.google.com/web/search/-32.163,26.624">Google
+Earth</a> | <a
+href="https://livingatlas.arcgis.com/wayback/#mapCenter=26.624,-32.163,16">Esri
+Wayback</a> <strong>Trend</strong>: GPP slope = +16.4 gC/m2/yr, SVH
+slope = +0.020 m/yr (both significant)</p>
+<figure>
+<img src="../plots/example_trajectory_a.png" alt="Pixel A trajectory" />
+<figcaption aria-hidden="true">Pixel A trajectory</figcaption>
+</figure>
+<p>The red line (test pixel) sits consistently above the natural mean
+(green dashed) and transformed mean (orange dashed) for GPP, confirming
+strong productivity recovery. SVH is more modest but still above the
+natural average. The KNN mean (blue) tracks close to the natural mean,
+indicating the pixel’s local natural neighbourhood is representative of
+the broader ecoregion.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Raw value</th>
+<th>Percentile</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. GPP percentile</td>
+<td>1,317 gC/m2/yr</td>
+<td><strong>91.0</strong></td>
+<td>GPP exceeds 91% of natural pixels — well above the natural median of
+914</td>
+</tr>
+<tr>
+<td>A. SVH percentile</td>
+<td>1.48 m</td>
+<td><strong>79.7</strong></td>
+<td>Vegetation height of 1.48 m exceeds nearly 80% of natural pixels
+(median = 1.10 m)</td>
+</tr>
+<tr>
+<td>B. GPP KNN ratio</td>
+<td>1.26</td>
+<td><strong>84.9</strong></td>
+<td>GPP is 26% <em>above</em> its 10 nearest natural neighbours; this
+ratio is at the 85th percentile of natural</td>
+</tr>
+<tr>
+<td>B. SVH KNN ratio</td>
+<td>1.14</td>
+<td><strong>79.3</strong></td>
+<td>Structure is 14% above local natural neighbours</td>
+</tr>
+<tr>
+<td>C. Embedding (ecoregion)</td>
+<td>0.808</td>
+<td><strong>30.8</strong></td>
+<td>Landscape fingerprint is less similar to natural than 69% of
+natural-to-natural comparisons</td>
+</tr>
+<tr>
+<td>C. Embedding (local)</td>
+<td>0.831</td>
+<td><strong>16.3</strong></td>
+<td>Locally, the landscape fingerprint is less similar to natural than
+most natural neighbours are to each other</td>
+</tr>
+<tr>
+<td><strong>Composite GPP</strong></td>
+<td></td>
+<td><strong>55.8</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Composite SVH</strong></td>
+<td></td>
+<td><strong>51.5</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Overall recovery score</strong></td>
+<td></td>
+<td><strong>53.6</strong></td>
+<td>Just above the natural median</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation</strong>: This pixel is highly productive —
+its GPP of 1,317 gC/m2/yr is 44% above the natural median of 914, which
+can happen when a former field recovers vigorously under favourable
+conditions. However, the embedding scores are well below 50, telling us
+that despite its productivity, this patch still looks quite different
+from intact natural grassland in other landscape properties. It is
+likely dominated by fast-growing pioneer grasses rather than the
+diverse, multi-layered plant community typical of mature Highveld
+grassland.</p>
+<hr />
+<h3 id="pixel-b-advanced-recovery-score-82.2">Pixel B — Advanced
+recovery (score: 82.2)</h3>
+<p><strong>Location</strong>: -27.49°S, 28.20°E | <a
+href="https://www.google.com/maps/place/-27.485,28.202/@-27.485,28.202,1500m/data=!3m1!1e3">Google
+Maps</a> | <a
+href="https://earth.google.com/web/search/-27.485,28.202">Google
+Earth</a> | <a
+href="https://livingatlas.arcgis.com/wayback/#mapCenter=28.202,-27.485,16">Esri
+Wayback</a></p>
+<figure>
+<img src="../plots/example_trajectory_b.png" alt="Pixel B trajectory" />
+<figcaption aria-hidden="true">Pixel B trajectory</figcaption>
+</figure>
+<p>The test pixel’s GPP (red) is far above both the natural mean and its
+local KNN mean — nearly double the ecoregion average. The SVH trajectory
+is dramatic: the test pixel reaches 2.8–3.9 m, far above the natural
+grassland average of ~1.2 m, consistent with woody encroachment or
+afforestation on former cropland (SANLC class 7 = plantation). This is
+reflected in the near-perfect SVH percentile scores.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Raw value</th>
+<th>Percentile</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. GPP percentile</td>
+<td>1,757 gC/m2/yr</td>
+<td><strong>98.0</strong></td>
+<td>Among the most productive pixels in the ecoregion — nearly double
+the natural median</td>
+</tr>
+<tr>
+<td>A. SVH percentile</td>
+<td>3.90 m</td>
+<td><strong>99.2</strong></td>
+<td>Exceptional vegetation height — in the top 1% of natural pixels</td>
+</tr>
+<tr>
+<td>B. GPP KNN ratio</td>
+<td>1.37</td>
+<td><strong>90.5</strong></td>
+<td>37% more productive than local natural neighbours</td>
+</tr>
+<tr>
+<td>B. SVH KNN ratio</td>
+<td>3.65</td>
+<td><strong>99.5</strong></td>
+<td>Height far exceeds local natural benchmarks (3.6x neighbours)</td>
+</tr>
+<tr>
+<td>C. Embedding (ecoregion)</td>
+<td>0.743</td>
+<td><strong>83.8</strong></td>
+<td>Landscape fingerprint is more similar to natural than 84% of
+natural-to-natural comparisons</td>
+</tr>
+<tr>
+<td>C. Embedding (local)</td>
+<td>0.801</td>
+<td><strong>51.3</strong></td>
+<td>Local similarity is right at the natural median</td>
+</tr>
+<tr>
+<td><strong>Overall recovery score</strong></td>
+<td></td>
+<td><strong>82.2</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation</strong>: This pixel shows exceptional
+recovery across all dimensions. The very high SVH (3.9 m, likely a woody
+encroachment or forest patch) and the high C_eco score (84th percentile)
+indicate that this pixel has not only recovered productively but its
+multi-source satellite signature closely resembles intact natural
+vegetation. This is the profile of a site well advanced toward full
+ecosystem recovery, potentially reflecting longer time since abandonment
+or proximity to natural seed sources.</p>
+<hr />
+<h3 id="pixel-c-early-or-limited-recovery-score-24.1">Pixel C — Early or
+limited recovery (score: 24.1)</h3>
+<p><strong>Location</strong>: -30.67°S, 26.70°E | <a
+href="https://www.google.com/maps/place/-30.672,26.698/@-30.672,26.698,1500m/data=!3m1!1e3">Google
+Maps</a> | <a
+href="https://earth.google.com/web/search/-30.672,26.698">Google
+Earth</a> | <a
+href="https://livingatlas.arcgis.com/wayback/#mapCenter=26.698,-30.672,16">Esri
+Wayback</a></p>
+<figure>
+<img src="../plots/example_trajectory_c.png" alt="Pixel C trajectory" />
+<figcaption aria-hidden="true">Pixel C trajectory</figcaption>
+</figure>
+<p>The test pixel’s GPP (red) hovers near the natural mean (green
+dashed) throughout the time series — consistent with its Metric A
+percentile of ~51. SVH sits at or just below the natural average, and
+both show only modest upward trends. Compared to Pixels A and B, there
+is no clear visual separation between the test pixel and the natural
+reference envelope, suggesting this pixel has recovered to roughly
+natural productivity levels but without overshooting.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Raw value</th>
+<th>Percentile</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. GPP percentile</td>
+<td>918 gC/m2/yr</td>
+<td><strong>50.8</strong></td>
+<td>GPP is just at the natural median (914) — productivity has recovered
+to a typical natural level</td>
+</tr>
+<tr>
+<td>A. SVH percentile</td>
+<td>1.06 m</td>
+<td><strong>41.9</strong></td>
+<td>Vegetation height is slightly below the natural median of 1.10
+m</td>
+</tr>
+<tr>
+<td>B. GPP KNN ratio</td>
+<td>1.00</td>
+<td><strong>55.8</strong></td>
+<td>Productivity matches local natural neighbours almost exactly</td>
+</tr>
+<tr>
+<td>B. SVH KNN ratio</td>
+<td>0.69</td>
+<td><strong>1.9</strong></td>
+<td>Structure is at only 69% of local natural benchmarks — in the bottom
+2% of natural variation</td>
+</tr>
+<tr>
+<td>C. Embedding (ecoregion)</td>
+<td>0.830</td>
+<td><strong>20.2</strong></td>
+<td>Landscape fingerprint is much less similar to natural than most
+natural-to-natural comparisons</td>
+</tr>
+<tr>
+<td>C. Embedding (local)</td>
+<td>0.752</td>
+<td><strong>1.0</strong></td>
+<td>Local landscape similarity is at the very bottom of the natural
+distribution</td>
+</tr>
+<tr>
+<td><strong>Overall recovery score</strong></td>
+<td></td>
+<td><strong>24.1</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation</strong>: An interesting case where
+productivity has recovered to near-natural levels (GPP of 918, right at
+the median) but structural and compositional recovery has not followed.
+The very low SVH KNN ratio (69% of neighbours, 2nd percentile) and
+extremely low embedding scores suggest that this vegetation is
+structurally simple and looks fundamentally different from natural
+grassland. Possible explanations include low-growing secondary
+vegetation, altered phenological patterns, or persistent legacy effects
+of prior land use. This is the kind of site where productivity alone
+would misleadingly suggest recovery, but the full multi-metric
+assessment reveals how much further it has to go.</p>
+<hr />
+<h3 id="summary-of-the-three-examples">Summary of the three
+examples</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Pixel A</th>
+<th>Pixel B</th>
+<th>Pixel C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recovery score</strong></td>
+<td>53.6</td>
+<td>82.2</td>
+<td>24.1</td>
+</tr>
+<tr>
+<td><strong>Productivity recovery</strong></td>
+<td>Strong (overshooting)</td>
+<td>Exceptional</td>
+<td>Moderate (at natural median)</td>
+</tr>
+<tr>
+<td><strong>Structural recovery</strong></td>
+<td>Strong</td>
+<td>Exceptional</td>
+<td>Weak (far below neighbours)</td>
+</tr>
+<tr>
+<td><strong>Compositional/landscape convergence</strong></td>
+<td>Lagging</td>
+<td>Strong</td>
+<td>Very lagging</td>
+</tr>
+<tr>
+<td><strong>Likely stage</strong></td>
+<td>Active recovery</td>
+<td>Near-full recovery</td>
+<td>Early/stalled recovery</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="batch-results-highveld-grasslands-ecoregion-81">Batch Results:
+Highveld Grasslands (Ecoregion 81)</h2>
+<p>The recovery degree analysis was run for all recovering pixels in the
+Highveld Grasslands ecoregion, which is the dominant grassland ecoregion
+in the South African interior.</p>
+<h3 id="scale">Scale</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recovering pixels identified</td>
+<td>317,811</td>
+</tr>
+<tr>
+<td>Total pixel-records scored</td>
+<td>826,973</td>
+</tr>
+<tr>
+<td>Natural reference pixels used</td>
+<td>59,195</td>
+</tr>
+</tbody>
+</table>
+<h3 id="summary-statistics">Summary Statistics</h3>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 12%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Mean</th>
+<th>Median</th>
+<th>Std Dev</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (GPP percentile)</td>
+<td>90.9</td>
+<td>94.7</td>
+<td>11.6</td>
+<td>Recovering pixels have higher productivity than ~91% of natural
+pixels</td>
+</tr>
+<tr>
+<td>A (SVH percentile)</td>
+<td>86.3</td>
+<td>88.7</td>
+<td>12.0</td>
+<td>Vegetation height exceeds ~86% of natural pixels</td>
+</tr>
+<tr>
+<td>B (KNN GPP ratio)</td>
+<td>72.5</td>
+<td>77.0</td>
+<td>19.3</td>
+<td>Compared to local neighbours, productivity exceeds ~73% of natural
+benchmarks</td>
+</tr>
+<tr>
+<td>B (KNN SVH ratio)</td>
+<td>74.8</td>
+<td>80.1</td>
+<td>23.4</td>
+<td>Compared to local neighbours, structure exceeds ~75% of natural
+benchmarks</td>
+</tr>
+<tr>
+<td>C eco (embedding sim.)</td>
+<td>28.5</td>
+<td>25.0</td>
+<td>18.5</td>
+<td>Landscape similarity to ecoregion natural is lower than most
+natural-to-natural comparisons</td>
+</tr>
+<tr>
+<td>C local (embedding sim.)</td>
+<td>17.6</td>
+<td>15.0</td>
+<td>16.7</td>
+<td>Local landscape similarity is well below natural-to-natural
+levels</td>
+</tr>
+<tr>
+<td><strong>Composite score</strong></td>
+<td><strong>52.1</strong></td>
+<td><strong>51.9</strong></td>
+<td><strong>9.5</strong></td>
+<td><strong>Overall, pixels are near the natural median</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Score range: 0.1 to 91.2 (out of 100).</p>
+<h3 id="what-this-means-ecologically">What This Means Ecologically</h3>
+<p>The results reveal a clear pattern: <strong>productivity has
+recovered, but the broader landscape signal has not yet converged to
+natural</strong>.</p>
+<ul>
+<li><p><strong>Metrics A and B</strong> (both well above 50) tell us
+that these recovering pixels have <em>regained or even exceeded</em> the
+productivity and vegetation height of natural grasslands.</p></li>
+<li><p><strong>Metric C</strong> (well below 50) tells a different
+story: despite productive vegetation, the multi-source satellite
+fingerprint of these pixels still looks different from intact natural
+grassland. This could reflect differences in species composition (e.g.,
+dominance of pioneer grasses rather than climax species), vegetation
+structure (uniform canopy rather than the heterogeneous structure of
+mature grassland), seasonal phenology (different green-up/senescence
+timing), or residual soil and land-use signatures.</p></li>
+<li><p>The <strong>composite score of ~52</strong> balances these two
+signals. On average, recovering Highveld pixels are near the natural
+median when all dimensions are considered, but this masks the divergence
+between productivity recovery (strong) and compositional/structural
+recovery (lagging).</p></li>
+</ul>
+<p>This pattern — functional recovery outpacing compositional recovery —
+is well documented in restoration ecology and suggests that while these
+grasslands have regained their capacity to fix carbon and accumulate
+biomass, they may still differ from intact natural areas in ecologically
+important ways that satellite-based productivity measures alone would
+miss.</p>
+<hr />
+<h2 id="data-and-software">Data and Software</h2>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 25%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Source</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_global-pasture-watch_assets_ggpp-30m_v1_ugpp_m">GPP</a>
+(annual sum)</td>
+<td>Global Pasture Watch (<a
+href="https://doi.org/10.7717/peerj.19774">Paper</a>)</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_global-pasture-watch_assets_gsvh-30m_v1_short-veg-height_m">SVH</a>
+(annual mosaic)</td>
+<td>Global Pasture Watch (<a
+href="https://doi.org/10.1038/s41597-025-05739-6">Paper</a>)</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td><a
+href="https://egis.environment.gov.za/sa_national_land_cover_datasets">Land
+cover</a></td>
+<td>South African National Land Cover 2022, reclassified to 7
+classes</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/RESOLVE_ECOREGIONS_2017">Ecoregions</a></td>
+<td>RESOLVE Ecoregions 2017 (<a
+href="https://doi.org/10.1093/biosci/bix014">Paper</a>)</td>
+<td>Vector</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL">AlphaEarth
+embeddings</a></td>
+<td>Google/DeepMind Satellite Embedding V1, 2022 annual mosaic</td>
+<td>10 m</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/WRI_SBTN_naturalLands_v1_1_2020">SBTN
+Natural Lands</a></td>
+<td>WRI SBTN Natural Lands Map 2020</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/projects_nature-trace_assets_forest_typology_natural_forest_2020_v1_0_collection">Natural
+Forests typology</a></td>
+<td>Nature-Trace (<a
+href="https://doi.org/10.1038/s41597-025-06097-z">Paper</a>)</td>
+<td>10 m</td>
+</tr>
+<tr>
+<td><a
+href="https://developers.google.com/earth-engine/datasets/catalog/CSP_HM_GlobalHumanModification">Global
+Human Modification</a></td>
+<td>GHM (Kennedy et al.</td>
+<td><a href="https://doi.org/10.1038/s41597-025-04892-2">Paper</a>)</td>
+</tr>
+<tr>
+<td><a
+href="https://gee-community-catalog.org/projects/bii_africa/">Biodiversity
+Intactness Index</a></td>
+<td>BII Africa</td>
+<td>1 km</td>
+</tr>
+</tbody>
+</table>
+<p>All processing is performed in Python using <a
+href="https://earthengine.google.com/">Google Earth Engine</a> for data
+extraction, <a href="https://duckdb.org/">DuckDB</a> for efficient
+columnar queries on large parquet files, <a
+href="https://scikit-learn.org/">scikit-learn</a> for spatial indexing
+and similarity computation, and <a href="https://scipy.org/">SciPy</a>
+for statistical testing.</p>
+</body>
+</html>
