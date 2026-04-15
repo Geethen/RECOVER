@@ -1,10 +1,74 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
-*.egg-info
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Virtual environments
+# Data and models (excluding templates)
+**/*.csv
+**/*.extracted_indices.csv.checkpoint.json
+**/*.shp
+**/*.shx
+**/*.dbf
+**/*.prj
+**/*.cpg
+**/*.geojson
+models/*.pth
+!models/.gitkeep
+
+# Large data files
+**/*.parquet
+**/*.gpkg
+**/*.tif
+**/*.tiff
+**/*.nc
+**/*.h5
+**/*.hdf5
+**/*.zarr
+**/*.feather
+
+# Temp / intermediate outputs
+data/temp_features/
+data/validation/
+data/verification_plots/
+logs/
+
+# Checkpoint files
+**/*.checkpoint.json
+
+# Plots
+plots/
+data/**/*.png
+data/**/*.kml
+data/**/*.html
+
+# IDEs
+.vscode/
+.idea/
+.vincent/
+
+# Weights & Biases
+wandb/
+
+# Environment
+.env
 .venv
+venv/
+ENV/

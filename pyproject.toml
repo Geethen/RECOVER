@@ -1,9 +1,12 @@
 [project]
 name = "recover"
 version = "0.1.0"
-description = "Add your description here"
+description = "Ecosystem Condition and Recovery Modeling"
 readme = "README.md"
 requires-python = ">=3.13"
+authors = [
+    {name = "G. Singh", email = "geethen.singh@gmail.com"}
+]
 dependencies = [
     "black>=26.3.1",
     "dask[complete]>=2026.3.0",
@@ -36,6 +39,11 @@ dependencies = [
     "torchgeo>=0.9.0",
     "torchvision>=0.26.0",
     "tqdm>=4.67.3",
+    "wandb",
     "xarray>=2026.4.0",
     "xgboost>=3.2.0",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
