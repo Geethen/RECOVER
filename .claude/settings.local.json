@@ -11,7 +11,8 @@
       "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\extraction\\\\extract_bioregion_ids.py\")",
       "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\score_by_bioregion.py\")",
       "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" -c \":*)",
-      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\generate_bioregion_narrative_plots.py\")"
+      "Bash(\"C:\\\\Users\\\\coach\\\\.conda\\\\envs\\\\erthy\\\\python.exe\" \"c:\\\\Users\\\\coach\\\\myfiles\\\\postdoc2\\\\code\\\\scripts\\\\analysis\\\\generate_bioregion_narrative_plots.py\")",
+      "Bash(sort -t'o' -k3 -n)"
     ]
   }
 }

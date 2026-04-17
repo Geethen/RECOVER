@@ -125,8 +125,8 @@ def discover_natural_bioregions():
 def load_recovering_for_bioregion(bio_id):
     """Load recovering pixels for a specific bioregion across all eco files.
     Uses DuckDB to join rec + emb + scores per eco, filtered by bioregion_id.
-    Returns a single DataFrame with pixel_id, lat, lon, eco_id, sanlc_2022,
-    gpp_slope, svh_slope, LATE_GPP, LATE_SVH, EMBED_COLS, niaps.
+    Returns a single DataFrame with pixel_id, lat, lon, sanlc_2022,
+    gpp_slope, svh_slope, LATE_GPP, LATE_SVH, EMBED_COLS, bioregion_id, niaps.
     """
     frames = []
     late_gpp_sel = ", ".join(f"r.{c}" for c in LATE_GPP)
@@ -171,7 +171,7 @@ def load_recovering_for_bioregion(bio_id):
                     r.sanlc_2022, r.gpp_slope, r.svh_slope,
                     {late_gpp_sel}, {late_svh_sel},
                     {embed_sel},
-                    s.bioregion_id, s.eco_id{niaps_col}
+                    s.bioregion_id{niaps_col}
                 FROM '{rp}' r
                 JOIN '{ep}' e ON CAST(r.pixel_id AS BIGINT) = CAST(e.pixel_id AS BIGINT)
                 JOIN '{sp}' s ON CAST(r.pixel_id AS BIGINT) = CAST(s.pixel_id AS BIGINT)
@@ -375,7 +375,6 @@ def process_bioregion(bio_id, bio_names, test_mode=False):
             "latitude": chunk["latitude"].values.astype(np.float32),
             "longitude": chunk["longitude"].values.astype(np.float32),
             "bioregion_id": bio_id,
-            "eco_id": chunk["eco_id"].values if "eco_id" in chunk.columns else 0,
             "sanlc_2022": chunk["sanlc_2022"].values,
             "gpp_slope": chunk["gpp_slope"].values,
             "svh_slope": chunk["svh_slope"].values,
